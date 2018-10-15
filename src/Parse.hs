@@ -5,7 +5,7 @@ module Parse
         parseJump
     ) where
 
-parseDest :: String -> [Integer]
+parseDest :: String -> [Int]
 parseDest dest = case dest of 
     "M"   -> [0, 0, 1]
     "D"   -> [0, 1, 0]
@@ -16,7 +16,7 @@ parseDest dest = case dest of
     "AMD" -> [1, 1, 1]
     _     -> [0, 0, 0]
 
-parseOperation :: String -> [Integer]
+parseOperation :: String -> [Int]
 parseOperation oper = case oper of
     "0"     -> [0, 1, 0 ,1, 0, 1, 0]
     "1"     -> [0, 1, 1, 1, 1, 1, 1]
@@ -48,7 +48,7 @@ parseOperation oper = case oper of
     "D|M"   -> [1, 0, 1, 0, 1, 0, 1]
     _       -> [0, 0, 0, 0, 0, 0, 0]
 
-parseJump :: String -> [Integer]
+parseJump :: String -> [Int]
 parseJump jump = case jump of
     "JGT" -> [0, 0, 1]
     "JEQ" -> [0, 1, 0]

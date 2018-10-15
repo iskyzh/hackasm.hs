@@ -1,28 +1,26 @@
 module Instruction
-    ( loadInstruction
+    ( loadInstruction,
+      Instruction (..)
     ) where
 
-import Data.Map (Map)
-import Prase
+        import Parse
 
-data Instruction = AInstruction Integer | ALabel String | DInstruction String
-data SymbolTable = SymbolTable Map String Integer
+        data Instruction = AInstruction String | Instruction [Int] deriving Show
 
-loadInstruction :: [String] -> [Maybe Instruction]
-
-loadInstruction (instruction:xs) = parse instruction
-    where
-            parse :: String -> Integer -> Meybe Instruction
-            parse ('@':addr) line = Just parseA addr ++ loadInstruction xs
-            parse ('(':label:')') = Nothing ++ loadInstruction xs line
-            parse (dest:'=':operation) = Just parseD dest operation "" ++ loadInstruction xs
-            parse (dest:';':jump) = Just parseD dest "" jump ++ loadInstruction xs
-            parse _ = Nothing
-
-            parseA :: String -> Instruction
-            parseA addr
-                        | all isDigit addr = AInstruction read addr :: Integer
-                        | otherwise = ALabel addr
-            
-            parseD :: String -> String -> String -> Instruction
-            parseD dest operation jump = parseDest dest ++ parseOperation operation ++ parseJump jump
+        loadInstruction :: [String] -> [Maybe Instruction]
+        
+        loadInstruction (instruction:xs) = (parse instruction) : loadInstruction xs where
+            parse :: String -> Maybe Instruction
+            parse ('@':a) = Just (AInstruction a)
+            parse ('(':label) = Nothing
+            parse dInstruction = Just (Instruction ([1, 1, 1] ++ parseToken dInstruction parseFunc parseOper)) where
+                parseFunc = [parseDest, parseOperation, parseJump]
+                parseOper = [(== '='), (== ';'), (\x -> False)]
+                
+                parseToken :: String -> [String -> [Int]] -> [Char -> Bool] -> [Int]
+                parseToken instruction (func:funcs) (oper:opers) = let (ins, rest) = break oper instruction in 
+                    (func ins) ++ case rest of
+                        "" -> parseToken "" funcs opers
+                        _ -> parseToken (tail rest) funcs opers
+                parseToken _ _ _ = []
+        loadInstruction _ = []
