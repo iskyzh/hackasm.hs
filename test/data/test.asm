@@ -1,4 +1,5 @@
 @23333
+(TEST)
 D=D+M
 A;JGT
 0;JMP

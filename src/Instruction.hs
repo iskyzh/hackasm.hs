@@ -13,14 +13,17 @@ module Instruction
             parse :: String -> Maybe Instruction
             parse ('@':a) = Just (AInstruction a)
             parse ('(':label) = Nothing
-            parse dInstruction = Just (Instruction ([1, 1, 1] ++ parseToken dInstruction parseFunc parseOper)) where
-                parseFunc = [parseDest, parseOperation, parseJump]
-                parseOper = [(== '='), (== ';'), (\x -> False)]
-                
-                parseToken :: String -> [String -> [Int]] -> [Char -> Bool] -> [Int]
-                parseToken instruction (func:funcs) (oper:opers) = let (ins, rest) = break oper instruction in 
-                    (func ins) ++ case rest of
-                        "" -> parseToken "" funcs opers
-                        _ -> parseToken (tail rest) funcs opers
-                parseToken _ _ _ = []
+            parse dInstruction = Just (Instruction ([1, 1, 1] ++ parseToken dInstruction))
+            
+            parseToken :: String -> [Int]
+            parseToken instruction = let (dest, oper, jump) = breakToken in
+                parseOperation oper ++ parseDest dest ++ parseJump jump where
+                    breakToken = let (rest, jump) = break (==';') instruction
+                                     (dest, oper) = break (=='=') rest in 
+                                        case oper of
+                                            "" -> ("", dest, tryTail jump)
+                                            _ -> (dest, tryTail oper, tryTail jump) 
+                                     where
+                                        tryTail (x:xs) = xs
+                                        tryTail _ = ""
         loadInstruction _ = []

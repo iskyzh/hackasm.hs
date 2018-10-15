@@ -9,12 +9,14 @@ import Data.Char (isDigit, isSpace)
 import Prelude hiding (lookup)
 
 import Data.Map.Strict (lookup)
+import Data.List (isPrefixOf)
 
 assemble :: String -> String
 assemble code = (unlines . map convert . assemble') parsedInstructions where
     instructions' = lines code
-    filterSpace line = filter (not . isSpace) line
-    instructions = filter (\row -> not (row == "")) (map filterSpace instructions')
+    filterComment instruction = let (ins, com) = break (=='/') instruction in ins
+    filterSpace = filter (not . isSpace)
+    instructions = filter (\row -> row /= "" && not ("//" `isPrefixOf` row)) (map (filterComment . filterSpace) instructions')
     symbolTable = loadSymbol instructions
     parsedInstructions = loadInstruction instructions 
 
